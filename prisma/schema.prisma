@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid()) @map("id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  email     String   @unique
+  firstName String?  @map("first_name")
+  lastName  String?  @map("last_name")
+  password  String
+  userKey   String   @unique @map("user_key")
+
+  @@map("users")
+}
+
+model Chat {
+  id                  String    @id @default(cuid()) @map("id")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  type                String    @map("type")
+  chatCode            String    @map("chat_code")
+  name                String    @map("name")
+  totalUnreadMessages Int       @default(dbgenerated("0")) @map("total_unread_messages")
+  fromUserId          String?   @map("from_user_id")
+  toUserId            String?   @map("to_user_id")
+  Message             Message[]
+
+  @@map("chats")
+}
+
+model Message {
+  id           String   @id @default(cuid()) @map("id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  content      String   @map("content") @db.VarChar(6000)
+  chatCode     String   @map("chat_code")
+  chat         Chat     @relation(fields: [chatAuthorId], references: [id])
+  chatAuthorId String   @map("chat_author_id")
+
+  @@map("messages")
+}
